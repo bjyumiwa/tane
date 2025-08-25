@@ -1,4 +1,4 @@
-<!-- FILE: index.html （常にEYE条件で開始）-->
+<!-- FILE: /tane/index.html（EYE固定・暗闇→明るさ・命名・小さな夢・キャラ25%） -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -8,133 +8,222 @@
   <meta name="color-scheme" content="dark light" />
   <style>
     :root{
-      --L: 0.10;
-      --veil: 0.90;
+      --L: 0.02;   /* 初期はほぼ真っ暗 */
     }
     html,body{height:100%;margin:0}
     body{
-      font-family:"Noto Sans JP", system-ui, sans-serif;
+      font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Sans",Meiryo,sans-serif;
       color:#fff;
       background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-      display:flex; flex-direction:column; align-items:center; gap:10px; padding:10px;
+      display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;overflow:hidden
     }
-    .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
-    .chip{background:rgba(0,0,0,.35); padding:6px 10px; border-radius:999px; font-size:12px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .chip{background:rgba(0,0,0,.35);backdrop-filter:blur(3px);border:1px solid rgba(255,255,255,.18);padding:6px 10px;border-radius:999px;font-size:12px}
 
-    .stage{position:relative; width:min(92vw,720px); aspect-ratio:1/1; border-radius:24px;
-      border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.02); overflow:hidden}
-    .veil{position:absolute; inset:0; background:rgba(0,0,0,var(--veil)); transition:background .4s ease}
+    /* ステージ */
+    .stage{position:relative;width:min(92vw,720px);aspect-ratio:1/1;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.02);overflow:hidden}
+    .veil{position:absolute;inset:0;background:rgba(0,0,0,1);transition:background .35s ease;z-index:20}
 
-    .char{position:absolute; left:50%; bottom:6%; transform:translateX(-50%); width:58%;}
-    .eyes{position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); width:140px; height:60px; display:none}
-    .eye{position:absolute; width:52px; height:52px; border-radius:50%; background:#fff; box-shadow:0 0 16px rgba(255,255,255,.55)}
+    /* キャラクター（25%に縮小） */
+    .char{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:25%;
+      filter:drop-shadow(0 10px 20px rgba(0,0,0,.6));pointer-events:none;transition:opacity .25s ease,transform .2s ease;opacity:0;z-index:10}
+    .char:hover{transform:translateX(-50%) scale(1.02)}
+
+    /* 目だけ（ベールの上に乗せる） */
+    .eyes{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:140px;height:60px;display:none;z-index:30}
+    .eye{position:absolute;top:0;width:52px;height:52px;border-radius:50%;
+      background:radial-gradient(circle at 55% 45%, #fff 0 10px,#eee 11px,#ddd 16px,#999 20px,#0000 21px);
+      box-shadow:0 0 16px rgba(255,255,255,.55)}
     .eye.left{left:0}
     .eye.right{right:0}
 
-    .hud{position:absolute; inset:12px; display:flex; flex-direction:column; justify-content:space-between}
-    .glass{background:rgba(0,0,0,.35); padding:6px 10px; border-radius:12px}
+    /* HUD */
+    .hud{position:absolute;inset:12px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .glass{background:rgba(0,0,0,.35);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;pointer-events:auto}
 
-    .btn{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:#fff;
-      padding:8px 12px; border-radius:10px; font-size:14px; cursor:pointer}
+    .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;cursor:pointer}
     .btn:hover{background:rgba(255,255,255,.16)}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-    .bar{height:10px; width:200px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden}
-    .bar>i{display:block; height:100%; width:0%; background:linear-gradient(90deg, #9AE4FF, #B1FFA6)}
+    .bar{height:10px;width:220px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+    .bar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#9AE4FF,#B1FFA6)}
 
-    .card{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      width:min(92vw,480px); background:rgba(0,0,0,.55); border-radius:16px; padding:16px; display:none}
-    .pill{padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.2); cursor:pointer}
-    .pill[data-selected="true"]{background:rgba(255,255,255,.2)}
+    .card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,560px);background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:16px;display:none}
+    .card h3{margin:.2em 0 .6em;font-size:18px}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.2);cursor:pointer}
+    .pill[data-selected="true"]{background:rgba(255,255,255,.16)}
 
-    .ending{position:absolute; inset:0; display:none; place-items:center}
-    .ending h2{background:rgba(0,0,0,.55); padding:10px 14px; border-radius:12px}
+    .ending{position:absolute;inset:0;display:none;place-items:center;backdrop-filter:blur(2px)}
+    .ending h2{font-size:22px;background:rgba(0,0,0,.45);padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.16)}
   </style>
 </head>
 <body>
   <div class="chips">
-    <span class="chip" id="condChip">cond:EYE</span>
-    <span class="chip">明るさ <b id="lVal">0.10</b></span>
+    <span class="chip">cond:EYE</span>
+    <span class="chip">明るさ <b id="lVal">0.02</b></span>
+    <span class="chip">?reset で初期化</span>
   </div>
 
-  <section class="stage">
+  <section class="stage" id="stage">
     <div class="veil" id="veil"></div>
-    <img id="char" class="char" src="public/assets/stage1/tane_pink.png" alt="tane" />
-    <div class="eyes" id="eyes">
-      <div class="eye left"></div><div class="eye right"></div>
-    </div>
 
+    <!-- キャラ（色は localStorage.color = pink/blue/green ） -->
+    <img id="char" class="char" alt="tane" src="public/assets/stage1/tane_pink.png" />
+
+    <!-- 目だけ表示レイヤー -->
+    <div class="eyes" id="eyes"><div class="eye left"></div><div class="eye right"></div></div>
+
+    <!-- HUD -->
     <div class="hud">
-      <div class="glass">
-        <span>夢：</span><span id="dreamBadge" class="pill">未選択</span>
-        <div class="bar"><i id="goalFill"></i></div>
-        <span id="goalPct">0%</span>
+      <div class="row glass">
+        <span>夢：</span>
+        <span id="dreamBadge" class="pill" title="選択した夢">未選択</span>
+        <span style="margin-left:8px">進捗</span>
+        <div class="bar" title="夢ゲージ"><i id="goalFill"></i></div>
+        <span id="goalPct" style="min-width:38px;text-align:right">0%</span>
       </div>
-      <div class="glass">
-        <button class="btn" id="btnCare">ケア</button>
-        <button class="btn" id="btnTalk">会話</button>
-        <button class="btn" id="btnWatch">見守り</button>
-        <button class="btn" id="btnReset">リセット</button>
+      <div class="row" style="justify-content:flex-end">
+        <div class="row glass">
+          <button class="btn" id="btnCare">ケア（+明るさ/花）</button>
+          <button class="btn" id="btnTalk">会話（+明るさ/歌）</button>
+          <button class="btn" id="btnWatch">見守り10秒（+明るさ/星）</button>
+          <button class="btn" id="btnReset" title="状態を初期化">リセット</button>
+        </div>
       </div>
     </div>
 
+    <!-- 命名（明るさ>=0.35） -->
     <div class="card" id="nameCard">
-      <h3>名前をつけますか？</h3>
-      <input id="nameInput" placeholder="なまえ" />
-      <button class="btn" id="btnSetName">決定</button>
+      <h3>この子に名前をつけますか？</h3>
+      <div class="row">
+        <input id="nameInput" class="glass" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2)" placeholder="なまえ" />
+        <button class="btn" id="btnSetName">決定</button>
+      </div>
     </div>
 
+    <!-- 夢選択（命名後） -->
     <div class="card" id="dreamCard">
-      <h3>夢をえらんでください</h3>
-      <span class="pill" data-goal="flower">🌸 花</span>
-      <span class="pill" data-goal="song">🎵 歌</span>
-      <span class="pill" data-goal="star">⭐ 星</span>
-      <button class="btn" id="btnChooseGoal">決定</button>
+      <h3>小さな夢をえらんでください</h3>
+      <div class="row">
+        <span class="pill" data-goal="flower">🌸 花を咲かせる</span>
+        <span class="pill" data-goal="song">🎵 歌を完成させる</span>
+        <span class="pill" data-goal="star">⭐ 星を見つける</span>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnChooseGoal">この夢にする</button>
+      </div>
     </div>
 
+    <!-- ハッピーエンド -->
     <div class="ending" id="ending"><h2 id="endingText">ハッピーエンド！</h2></div>
   </section>
 
 <script>
 (function(){
-  const LSKEY='tane_state';
-  const state=load()||{L:0.1,named:false,name:'',goal:null,progress:{flower:0,song:0,star:0},goalTarget:{flower:5,song:5,star:5},cond:'EYE'};
+  // ===== 実験状態 =====
+  const qs = new URLSearchParams(location.search);
+  const forceReset = qs.has('reset');
+  const LSKEY = 'whoai_tane_state_v2'; // v2: 旧データ無効化
+  const initial = {
+    L: 0.02,                 // 明るさ 0..1（EYE開始）
+    named: false,
+    name: '',
+    goal: null,              // 'flower'|'song'|'star'
+    progress: {flower:0, song:0, star:0},
+    goalTarget: {flower:5, song:5, star:5},
+    lastActive: Date.now(),
+    cond: 'EYE'
+  };
+  const state = (forceReset ? null : load()) || initial; save();
 
-  const char=document.getElementById('char');
-  const color=localStorage.getItem('color')||'pink';
-  char.src=`public/assets/stage1/tane_${color}.png`;
+  // ===== 要素 =====
+  const veil = document.getElementById('veil');
+  const charImg = document.getElementById('char');
+  const eyes = document.getElementById('eyes');
+  const lVal = document.getElementById('lVal');
+  const btnCare = document.getElementById('btnCare');
+  const btnTalk = document.getElementById('btnTalk');
+  const btnWatch = document.getElementById('btnWatch');
+  const btnReset = document.getElementById('btnReset');
+  const nameCard = document.getElementById('nameCard');
+  const nameInput = document.getElementById('nameInput');
+  const btnSetName = document.getElementById('btnSetName');
+  const dreamCard = document.getElementById('dreamCard');
+  const dreamBadge = document.getElementById('dreamBadge');
+  const btnChooseGoal = document.getElementById('btnChooseGoal');
+  const goalFill = document.getElementById('goalFill');
+  const goalPct = document.getElementById('goalPct');
+  const ending = document.getElementById('ending');
+  const endingText = document.getElementById('endingText');
 
-  const veil=document.getElementById('veil'),eyes=document.getElementById('eyes'),
-        lVal=document.getElementById('lVal'),nameCard=document.getElementById('nameCard'),
-        dreamCard=document.getElementById('dreamCard'),dreamBadge=document.getElementById('dreamBadge'),
-        goalFill=document.getElementById('goalFill'),goalPct=document.getElementById('goalPct'),
-        ending=document.getElementById('ending'),endingText=document.getElementById('endingText');
+  // キャラ色（localStorage.color があれば反映）
+  const color = (localStorage.getItem('color')||'pink').toLowerCase();
+  const valid = ['pink','blue','green'];
+  charImg.src = `public/assets/stage1/tane_${valid.includes(color)?color:'pink'}.png`;
 
-  document.getElementById('btnCare').onclick=()=>{bump(0.1); if(state.goal==='flower')state.progress.flower++; save(); update();};
-  document.getElementById('btnTalk').onclick=()=>{bump(0.1); if(state.goal==='song')state.progress.song++; save(); update();};
-  document.getElementById('btnWatch').onclick=()=>{bump(0.1); if(state.goal==='star')state.progress.star++; save(); update();};
-  document.getElementById('btnReset').onclick=()=>{localStorage.removeItem(LSKEY);location.reload();};
-  document.getElementById('btnSetName').onclick=()=>{state.named=true; state.name=document.getElementById('nameInput').value; save(); update();};
-  document.getElementById('btnChooseGoal').onclick=()=>{save(); update();};
-  dreamCard.onclick=e=>{if(e.target.classList.contains('pill')){[...dreamCard.querySelectorAll('.pill')].forEach(p=>p.dataset.selected='false'); e.target.dataset.selected='true'; state.goal=e.target.dataset.goal;}};
+  // ===== ハンドラ =====
+  btnCare.addEventListener('click', ()=> act('care'));
+  btnTalk.addEventListener('click', ()=> act('talk'));
+  btnWatch.addEventListener('click', ()=> watch10s());
+  btnReset.addEventListener('click', ()=>{ if(confirm('状態を初期化します。')){ localStorage.removeItem(LSKEY); location.reload(); }});
+  btnSetName.addEventListener('click', ()=>{ const v=(nameInput.value||'').trim().slice(0,16); if(!v) return; state.named=true; state.name=v; save(); updateAll(); });
 
-  update();
+  let chosen=null;
+  dreamCard.addEventListener('click', e=>{ const pill=e.target.closest('.pill[data-goal]'); if(!pill) return; [...dreamCard.querySelectorAll('.pill')].forEach(p=>p.dataset.selected='false'); pill.dataset.selected='true'; chosen=pill.dataset.goal; });
+  btnChooseGoal.addEventListener('click', ()=>{ if(!chosen) return; state.goal=chosen; save(); updateAll(); });
 
-  function bump(d){state.L=Math.min(1,state.L+d);}
-  function update(){
-    veil.style.background=`rgba(0,0,0,${(1-state.L).toFixed(2)})`;
-    lVal.textContent=state.L.toFixed(2);
-    eyes.style.display=(state.L<0.35)?'block':'none';
-    char.style.display=(state.L<0.35)?'none':'block';
-    nameCard.style.display=(!state.named&&state.L>=0.35)?'block':'none';
-    dreamCard.style.display=(state.named&&!state.goal)?'block':'none';
-    dreamBadge.textContent=state.goal||'未選択';
-    const p=state.goal?state.progress[state.goal]:0, t=state.goal?state.goalTarget[state.goal]:0;
-    const pct=t?Math.min(100,Math.round(100*p/t)):0;
-    goalFill.style.width=pct+'%'; goalPct.textContent=pct+'%';
-    if(pct>=100){ending.style.display='grid'; endingText.textContent=`${state.name||'きみ'}の夢がかなった！`;}
+  updateAll();
+
+  // ===== 行動 =====
+  function act(kind){
+    bumpL(0.10); // 行動ごとに明るさ+0.10
+    if(kind==='care' && state.goal==='flower') state.progress.flower = Math.min(state.progress.flower+1, state.goalTarget.flower);
+    if(kind==='talk' && state.goal==='song') state.progress.song   = Math.min(state.progress.song+1,   state.goalTarget.song);
+    state.lastActive = Date.now();
+    save(); updateAll();
   }
-  function save(){localStorage.setItem(LSKEY,JSON.stringify(state));}
-  function load(){try{return JSON.parse(localStorage.getItem(LSKEY)||'');}catch(e){return null;}}
+
+  function watch10s(){
+    btnWatch.disabled=true; const label=btnWatch.textContent; let s=10; btnWatch.textContent=`見守り中（${s}）`;
+    const t=setInterval(()=>{ s--; btnWatch.textContent=`見守り中（${s}）`; if(s<=0){ clearInterval(t); btnWatch.disabled=false; btnWatch.textContent=label; bumpL(0.10); if(state.goal==='star') state.progress.star = Math.min(state.progress.star+1, state.goalTarget.star); save(); updateAll(); } },1000);
+  }
+
+  function bumpL(d){ state.L = clamp(state.L + d, 0, 1); }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+  // ===== 表示更新 =====
+  function updateAll(){
+    const veilAlpha = clamp(1 - state.L, 0, 1);
+    veil.style.background = `rgba(0,0,0,${veilAlpha.toFixed(2)})`;
+    lVal.textContent = state.L.toFixed(2);
+
+    const eyesOnly = state.L < 0.35; // 0.35未満は目だけ
+    eyes.style.display = eyesOnly ? 'block' : 'none';
+    charImg.style.opacity = eyesOnly ? 0 : 1;
+
+    nameCard.style.display = (!state.named && state.L >= 0.35) ? 'block' : 'none';
+    dreamCard.style.display = (state.named && !state.goal) ? 'block' : 'none';
+
+    dreamBadge.textContent = state.goal ? goalLabel(state.goal) : '未選択';
+
+    const p = progressOf(state.goal); const t = targetOf(state.goal);
+    const pct = t>0 ? Math.min(100, Math.round(100*p/t)) : 0;
+    goalFill.style.width = pct + '%';
+    goalPct.textContent = pct + '%';
+
+    const achieved = t>0 && p>=t;
+    ending.style.display = achieved ? 'grid' : 'none';
+    if(achieved){ endingText.textContent = endingLine(state.goal); }
+  }
+
+  function progressOf(g){ if(!g) return 0; return state.progress[g]; }
+  function targetOf(g){ if(!g) return 0; return state.goalTarget[g]; }
+  function goalLabel(g){ return g==='flower'?'🌸 花': g==='song'?'🎵 歌': g==='star'?'⭐ 星':'未選択'; }
+  function endingLine(g){ const who=state.name||'きみ'; if(g==='flower')return `${who}といっしょに 花が咲いた`; if(g==='song')return `${who}といっしょに 歌が完成した`; if(g==='star')return `${who}といっしょに 星が見つかった`; return 'ハッピーエンド！'; }
+
+  function save(){ localStorage.setItem(LSKEY, JSON.stringify(state)); }
+  function load(){ try{ return JSON.parse(localStorage.getItem(LSKEY)||''); }catch(_){ return null; } }
 })();
 </script>
 </body>
