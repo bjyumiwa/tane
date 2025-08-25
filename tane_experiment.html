@@ -1,0 +1,205 @@
+<!-- FILE: /tane_experiment.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WhoAI｜tane 実験プロト</title>
+  <meta name="color-scheme" content="dark light" />
+  <style>
+    :root{
+      --L: 0.10;
+      --veil: 0.90;
+      --brand: #9AE4FF;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family:"Noto Sans JP", system-ui, sans-serif;
+      color:#fff;
+      background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
+      display:flex; flex-direction:column; align-items:center; gap:10px; padding:10px;
+      overflow:hidden;
+    }
+    .chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center}
+    .chip{background:rgba(0,0,0,.35); backdrop-filter:blur(3px); border:1px solid rgba(255,255,255,.18);
+      padding:6px 10px; border-radius:999px; font-size:12px}
+
+    .stage{position:relative; width:min(92vw,720px); aspect-ratio:1/1; border-radius:24px;
+      border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.02); overflow:hidden}
+    .veil{position:absolute; inset:0; background:rgba(0,0,0,var(--veil)); transition:background .4s ease}
+
+    .char{position:absolute; left:50%; bottom:6%; transform:translateX(-50%); width:58%;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,.6)); pointer-events:none; transition:transform .2s ease}
+    .char:hover{transform:translateX(-50%) scale(1.02)}
+
+    .eyes{position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); width:140px; height:60px; display:none}
+    .eye{position:absolute; top:0; width:52px; height:52px; border-radius:50%; background:radial-gradient(circle at 55% 45%, #fff 0 10px, #eee 11px, #ddd 16px, #999 20px, #0000 21px);
+      box-shadow:0 0 16px rgba(255,255,255,.55)}
+    .eye.left{left:0}
+    .eye.right{right:0}
+
+    .hud{position:absolute; inset:12px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none}
+    .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .glass{background:rgba(0,0,0,.35); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.16);
+      border-radius:12px; padding:8px 10px; pointer-events:auto}
+
+    .btn{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:#fff;
+      padding:10px 14px; border-radius:12px; font-size:14px; cursor:pointer}
+    .btn:hover{background:rgba(255,255,255,.16)}
+    .btn[disabled]{opacity:.45; cursor:not-allowed}
+
+    .bar{height:10px; width:200px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden}
+    .bar>i{display:block; height:100%; width:0%; background:linear-gradient(90deg, #9AE4FF, #B1FFA6)}
+
+    .card{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:min(92vw,560px); background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:16px;
+      display:none}
+    .card h3{margin:.2em 0 .6em; font-size:18px}
+    .pill{padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.2); cursor:pointer}
+    .pill[data-selected="true"]{background:rgba(255,255,255,.16)}
+
+    .ending{position:absolute; inset:0; display:none; place-items:center; backdrop-filter:blur(2px)}
+    .ending h2{font-size:22px; background:rgba(0,0,0,.45); padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16)}
+
+    footer{font-size:12px; opacity:.8}
+  </style>
+</head>
+<body>
+  <div class="chips">
+    <span class="chip" id="condChip">cond: -</span>
+    <span class="chip">WhoAI｜tane 実験</span>
+    <span class="chip">明るさ <b id="lVal">0.10</b></span>
+  </div>
+
+  <section class="stage" id="stage">
+    <div class="veil" id="veil"></div>
+
+    <!-- キャラ（色はlocalStorageのcolorに応じて切替） -->
+    <img id="char" class="char" alt="tane" src="public/assets/stage1/tane_pink.png" />
+
+    <div class="eyes" id="eyes">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+    </div>
+
+    <div class="hud">
+      <div class="row glass">
+        <span>夢：</span>
+        <span id="dreamBadge" class="pill">未選択</span>
+        <span style="margin-left:8px">進捗</span>
+        <div class="bar"><i id="goalFill"></i></div>
+        <span id="goalPct">0%</span>
+      </div>
+      <div class="row" style="justify-content:flex-end">
+        <div class="row glass">
+          <button class="btn" id="btnCare">ケアする</button>
+          <button class="btn" id="btnTalk">話しかける</button>
+          <button class="btn" id="btnWatch">見守る</button>
+          <button class="btn" id="btnReset">リセット</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="nameCard">
+      <h3>名前をつけますか？</h3>
+      <input id="nameInput" class="glass" placeholder="なまえ" />
+      <button class="btn" id="btnSetName">決定</button>
+    </div>
+
+    <div class="card" id="dreamCard">
+      <h3>夢をえらんでください</h3>
+      <div class="row">
+        <span class="pill" data-goal="flower">🌸 花</span>
+        <span class="pill" data-goal="song">🎵 歌</span>
+        <span class="pill" data-goal="star">⭐ 星</span>
+      </div>
+      <button class="btn" id="btnChooseGoal">決定</button>
+    </div>
+
+    <div class="ending" id="ending">
+      <h2 id="endingText">ハッピーエンド！</h2>
+    </div>
+  </section>
+
+  <footer>
+    <div class="chips">
+      <span class="chip">画像：public/assets/stage1/</span>
+      <span class="chip">色は localStorage.color で選択可能</span>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const COND = (qs.get('cond')||'SIL').toUpperCase();
+
+  const LSKEY = 'whoai_tane_state_v1';
+  const state = load() || {
+    L:0.10,named:false,name:'',goal:null,
+    progress:{flower:0,song:0,star:0},
+    goalTarget:{flower:5,song:5,star:5},
+    cond:COND
+  };
+
+  if(state.cond!==COND){state.cond=COND; save();}
+
+  const charImg=document.getElementById('char');
+  const color=localStorage.getItem('color')||'pink';
+  charImg.src=`public/assets/stage1/tane_${color}.png`;
+
+  const veil=document.getElementById('veil');
+  const eyes=document.getElementById('eyes');
+  const lVal=document.getElementById('lVal');
+  const condChip=document.getElementById('condChip');
+  const btnCare=document.getElementById('btnCare');
+  const btnTalk=document.getElementById('btnTalk');
+  const btnWatch=document.getElementById('btnWatch');
+  const btnReset=document.getElementById('btnReset');
+  const nameCard=document.getElementById('nameCard');
+  const nameInput=document.getElementById('nameInput');
+  const btnSetName=document.getElementById('btnSetName');
+  const dreamCard=document.getElementById('dreamCard');
+  const dreamBadge=document.getElementById('dreamBadge');
+  const btnChooseGoal=document.getElementById('btnChooseGoal');
+  const goalFill=document.getElementById('goalFill');
+  const goalPct=document.getElementById('goalPct');
+  const ending=document.getElementById('ending');
+  const endingText=document.getElementById('endingText');
+
+  update();
+
+  btnCare.onclick=()=>{bump(0.1); if(state.goal==='flower')state.progress.flower++; save(); update();};
+  btnTalk.onclick=()=>{bump(0.1); if(state.goal==='song')state.progress.song++; save(); update();};
+  btnWatch.onclick=()=>{bump(0.1); if(state.goal==='star')state.progress.star++; save(); update();};
+  btnReset.onclick=()=>{localStorage.removeItem(LSKEY); location.reload();};
+  btnSetName.onclick=()=>{state.named=true; state.name=nameInput.value; save(); update();};
+  dreamCard.onclick=e=>{
+    if(e.target.classList.contains('pill')){
+      [...dreamCard.querySelectorAll('.pill')].forEach(p=>p.dataset.selected='false');
+      e.target.dataset.selected='true'; state.goal=e.target.dataset.goal;
+    }
+  };
+  btnChooseGoal.onclick=()=>{save(); update();};
+
+  function bump(d){state.L=Math.min(1,state.L+d);}
+  function update(){
+    veil.style.background=`rgba(0,0,0,${(1-state.L).toFixed(2)})`;
+    lVal.textContent=state.L.toFixed(2);
+    condChip.textContent=`cond:${state.cond}`;
+    eyes.style.display=(state.cond==='EYE'&&state.L<0.35)?'block':'none';
+    charImg.style.display=(state.cond==='EYE'&&state.L<0.35)?'none':'block';
+    nameCard.style.display=(!state.named&&state.L>=0.35)?'block':'none';
+    dreamCard.style.display=(state.named&&!state.goal)?'block':'none';
+    dreamBadge.textContent=state.goal||'未選択';
+    let p=state.goal?state.progress[state.goal]:0;
+    let t=state.goal?state.goalTarget[state.goal]:0;
+    let pct=t?Math.min(100,Math.round(100*p/t)):0;
+    goalFill.style.width=pct+'%'; goalPct.textContent=pct+'%';
+    if(pct>=100){ending.style.display='grid'; endingText.textContent=`${state.name||'きみ'}の夢がかなった！`;}
+  }
+  function save(){localStorage.setItem(LSKEY,JSON.stringify(state));}
+  function load(){try{return JSON.parse(localStorage.getItem(LSKEY)||'');}catch(e){return null;}}
+})();
+</script>
+</body>
+</html>
