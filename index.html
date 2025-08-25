@@ -1,230 +1,358 @@
-<!-- FILE: /tane/index.html（EYE固定・暗闇→明るさ・命名・小さな夢・キャラ25%） -->
+<!-- FILE: /WHOAI2/index.html (fun-boosted) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhoAI｜tane 実験プロト</title>
-  <meta name="color-scheme" content="dark light" />
+  <title>WhoAI 2 | Welcome</title>
+  <meta name="description" content="WHOAI2: 人工知能と人間の関係性を考える研究型アプリケーション" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.85em' font-size='80'%3E🌙%3C/text%3E%3C/svg%3E" />
   <style>
     :root{
-      --L: 0.02;   /* 初期はほぼ真っ暗 */
+      --text:#fff; --accent:#f7b0bf; --ink:#222;
+      --glass: rgba(0,0,0,.35); --line: rgba(255,255,255,.22);
     }
+    *{box-sizing:border-box}
     html,body{height:100%;margin:0}
     body{
-      font-family:"Noto Sans JP",system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Sans",Meiryo,sans-serif;
-      color:#fff;
-      background:#000 url("public/assets/stage1/space_background.png") center/cover fixed no-repeat;
-      display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;overflow:hidden
+      font-family:"Noto Sans JP",system-ui,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Noto Color Emoji","Segoe UI Emoji",sans-serif;
+      color:var(--text);
+      background:#000 center/cover fixed no-repeat;
+      background-image:url("space_background.png");
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:24px; overflow:hidden;
     }
-    .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-    .chip{background:rgba(0,0,0,.35);backdrop-filter:blur(3px);border:1px solid rgba(255,255,255,.18);padding:6px 10px;border-radius:999px;font-size:12px}
+    /* ほんのり星のパララックス */
+    .stars{position:fixed;inset:0;pointer-events:none;opacity:.28}
+    .hero{
+      width:min(92vw, 860px); text-align:center;
+      padding:32px 20px 28px;
+      background:linear-gradient(transparent,rgba(0,0,0,.25));
+      border-radius:20px; position:relative;
+    }
+    .hero img#hero-ako{
+      display:block; margin:0 auto 22px;
+      width:min(42vw,260px); height:auto;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.35));
+      animation: float 6s ease-in-out infinite;
+      transform-origin:center bottom;
+      user-select:none; -webkit-user-drag:none;
+    }
+    @keyframes float{0%,100%{transform:translateY(-2px)}50%{transform:translateY(7px)}}
 
-    /* ステージ */
-    .stage{position:relative;width:min(92vw,720px);aspect-ratio:1/1;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.02);overflow:hidden}
-    .veil{position:absolute;inset:0;background:rgba(0,0,0,1);transition:background .35s ease;z-index:20}
+    /* 片目ウィンク（代替演出） */
+    .wink::after{
+      content:""; position:absolute; left:50%; top:calc(50% - 10px);
+      width:46px; height:10px; transform:translate(-50%,-50%) rotate(-8deg);
+      border-radius:999px; background:rgba(0,0,0,.35); filter:blur(0.5px);
+      animation:wink 3.2s infinite;
+      pointer-events:none;
+    }
+    @keyframes wink{0%,92%,100%{opacity:0}93%,97%{opacity:1}}
 
-    /* キャラクター（25%に縮小） */
-    .char{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:25%;
-      filter:drop-shadow(0 10px 20px rgba(0,0,0,.6));pointer-events:none;transition:opacity .25s ease,transform .2s ease;opacity:0;z-index:10}
-    .char:hover{transform:translateX(-50%) scale(1.02)}
+    h1{margin:0 0 14px; font-size:clamp(28px,5vw,44px); letter-spacing:.02em; text-shadow:0 2px 10px rgba(0,0,0,.6)}
+    .lead{margin:0 auto 16px; width:min(90%, 740px); min-height:2.6em;
+      font-size:clamp(15px,2.2vw,18px); line-height:1.9; text-shadow:0 1px 6px rgba(0,0,0,.55)}
+    .cta{ display:flex;gap:10px;justify-content:center;flex-wrap:wrap }
+    .primary,.ghost{
+      padding:.9rem 1.3rem;border:0;border-radius:14px;cursor:pointer;font-weight:800;
+      box-shadow:0 6px 18px rgba(0,0,0,.35); transition:transform .06s ease, filter .2s;
+    }
+    .primary{ background:var(--accent); color:var(--ink); }
+    .ghost{ background:rgba(255,255,255,.08); color:#fff; border:1px solid var(--line) }
+    .primary:active,.ghost:active{ transform:translateY(1px) }
+    .primary:hover{ filter:brightness(1.05) }
 
-    /* 目だけ（ベールの上に乗せる） */
-    .eyes{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:140px;height:60px;display:none;z-index:30}
-    .eye{position:absolute;top:0;width:52px;height:52px;border-radius:50%;
-      background:radial-gradient(circle at 55% 45%, #fff 0 10px,#eee 11px,#ddd 16px,#999 20px,#0000 21px);
-      box-shadow:0 0 16px rgba(255,255,255,.55)}
-    .eye.left{left:0}
-    .eye.right{right:0}
+    .lang{ margin-top:14px; font-size:14px; opacity:.95; user-select:none; }
+    .lang button{ background:none;border:0;color:#fff;text-decoration:underline;cursor:pointer;padding:2px 4px;margin:0 2px }
+    .note{font-size:12px;opacity:.8;margin-top:10px}
 
-    /* HUD */
-    .hud{position:absolute;inset:12px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .glass{background:rgba(0,0,0,.35);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;pointer-events:auto}
+    /* 今日のミッション */
+    .mission{
+      margin:8px auto 0; width:min(90%,740px);
+      display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap;
+      font-size:14px; opacity:.95;
+    }
+    .chip{
+      background:rgba(255,255,255,.08); border:1px solid var(--line);
+      padding:6px 10px; border-radius:999px;
+    }
+    .toggle{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    }
+    .toggle input{appearance:none; width:42px; height:24px; border-radius:999px; background:#666; position:relative; outline:none; transition:.2s}
+    .toggle input::after{
+      content:""; position:absolute; left:3px; top:3px; width:18px; height:18px;
+      background:#fff; border-radius:50%; transition:.2s;
+    }
+    .toggle input:checked{background:#82ffa6}
+    .toggle input:checked::after{left:21px}
 
-    .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;cursor:pointer}
-    .btn:hover{background:rgba(255,255,255,.16)}
-    .btn[disabled]{opacity:.5;cursor:not-allowed}
-
-    .bar{height:10px;width:220px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
-    .bar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#9AE4FF,#B1FFA6)}
-
-    .card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,560px);background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:16px;display:none}
-    .card h3{margin:.2em 0 .6em;font-size:18px}
-    .pill{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.2);cursor:pointer}
-    .pill[data-selected="true"]{background:rgba(255,255,255,.16)}
-
-    .ending{position:absolute;inset:0;display:none;place-items:center;backdrop-filter:blur(2px)}
-    .ending h2{font-size:22px;background:rgba(0,0,0,.45);padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.16)}
+    /* 花火用キャンバス・パーティクル */
+    canvas#fx{position:fixed; inset:0; pointer-events:none}
+    .spark{position:fixed; width:6px; height:6px; border-radius:50%; background:#fff; pointer-events:none; opacity:.9}
   </style>
 </head>
 <body>
-  <div class="chips">
-    <span class="chip">cond:EYE</span>
-    <span class="chip">明るさ <b id="lVal">0.02</b></span>
-    <span class="chip">?reset で初期化</span>
+  <canvas id="fx" class="stars"></canvas>
+
+  <div class="hero" role="banner" aria-label="WhoAI 2 hero">
+    <!-- 画像はそのまま。wink代替はJSで自動判断 -->
+    <img id="hero-ako" src="ako.png?v=2" alt="アコーディオンを弾くキャラクター" />
+
+    <h1 id="t_title">WhoAIへようこそ</h1>
+    <p id="t_desc" class="lead"></p>
+
+    <div class="mission">
+      <span class="chip" id="missionChip">🎯 今日のミッション: こんにちはって声をかけよう</span>
+      <label class="toggle chip" title="研究目的：名前の有無が愛着に与える影響">
+        <input id="nameToggle" type="checkbox" />
+        <span id="toggleLabel">名前を付けるテストに参加</span>
+      </label>
+    </div>
+
+    <div class="cta" style="margin-top:10px">
+      <button id="t_start" class="primary">はじめる</button>
+      <button id="t_continue" class="ghost" style="display:none" onclick="continueFlow()">つづきから</button>
+      <button id="t_about" class="ghost" onclick="location.href='about.html'">この研究について</button>
+    </div>
+
+    <div class="lang" aria-label="language switch">
+      <button type="button" onclick="setLang('ja')">日本語</button> |
+      <button type="button" onclick="setLang('en')">English</button> |
+      <button type="button" onclick="setLang('zh-CN')">简体</button> |
+      <button type="button" onclick="setLang('zh-TW')">繁體</button> |
+      <button type="button" onclick="setLang('ko')">한국어</button>
+      <div class="note" id="t_note">言語設定は次回アクセス時も保持されます。</div>
+    </div>
   </div>
 
-  <section class="stage" id="stage">
-    <div class="veil" id="veil"></div>
+  <script>
+    /* ===== 多言語テキスト ===== */
+    const I18N = {
+      "ja": {
+        title:"WhoAIへようこそ",
+        desc:"キャラクターをお世話して、あなたの心のよりどころを育てよう。小さな対話と行動の積み重ねが、愛着を少しずつ深くします。",
+        start:"はじめる",
+        cont:"つづきから",
+        about:"この研究について",
+        note:"言語設定は次回アクセス時も保持されます。",
+        toggle:"名前を付けるテストに参加",
+        missions:[
+          "こんにちはって声をかけよう",
+          "3つの音符を集めよう",
+          "今日の気分を1行メモしよう",
+          "1回だけ深呼吸しよう（キャラと一緒に）",
+          "キャラにニックネームを考えてみよう"
+        ]
+      },
+      "en": {
+        title:"Welcome to WhoAI",
+        desc:"Care for a character and let it grow into your emotional support. Small acts and dialogues gradually deepen attachment.",
+        start:"Start",
+        cont:"Continue",
+        about:"About this research",
+        note:"Your language preference is saved for your next visit.",
+        toggle:"Join the naming test",
+        missions:[
+          "Say hello to your character",
+          "Collect 3 musical notes",
+          "Write one-line mood note",
+          "Take one deep breath (together)",
+          "Think of a nickname"
+        ]
+      },
+      "zh-CN": {
+        title:"欢迎来到 WhoAI",
+        desc:"照料角色，让它成为你的情感支撑。细小的对话与行动，会让依恋逐步加深。",
+        start:"开始",
+        cont:"继续",
+        about:"关于本研究",
+        note:"语言设置会在下次访问时保留。",
+        toggle:"参与命名测试",
+        missions:["跟角色打声招呼","收集3个音符","写一句今天的心情","一起深呼吸一次","想一个昵称"]
+      },
+      "zh-TW": {
+        title:"歡迎來到 WhoAI",
+        desc:"照顧角色，讓它成為你的心靈依靠。細小的對話與行動，會讓依戀逐步加深。",
+        start:"開始",
+        cont:"從上次繼續",
+        about:"關於本研究",
+        note:"語言設定會在下次造訪時保留。",
+        toggle:"參與命名測試",
+        missions:["跟角色打招呼","收集3個音符","寫一句今日心情","一起深呼吸一次","想一個暱稱"]
+      },
+      "ko": {
+        title:"WhoAI에 오신 것을 환영합니다",
+        desc:"캐릭터를 돌보며 마음의 버팀목으로 키워 보세요. 작은 대화와 행동이 애착을 천천히 깊게 만듭니다.",
+        start:"시작하기",
+        cont:"이어하기",
+        about:"연구 소개",
+        note:"언어 설정은 다음 방문 시에도 유지됩니다.",
+        toggle:"이름 실험에 참여",
+        missions:["안녕! 하고 인사하기","음표 3개 모으기","오늘 기분 한 줄 기록","함께 심호흡 1회","닉네임 생각해 보기"]
+      }
+    };
 
-    <!-- キャラ（色は localStorage.color = pink/blue/green ） -->
-    <img id="char" class="char" alt="tane" src="public/assets/stage1/tane_pink.png" />
+    function applyLang(lang){
+      const t = I18N[lang] || I18N.ja;
+      document.documentElement.lang = lang.startsWith('zh') ? 'zh' : lang;
+      document.getElementById('t_title').textContent = t.title;
+      // タイプ風表示（短いので一瞬で）
+      typeLine(document.getElementById('t_desc'), t.desc, 800);
+      document.getElementById('t_start').textContent = t.start;
+      document.getElementById('t_about').textContent = t.about;
+      document.getElementById('t_note').textContent = t.note;
+      // 続きボタン文言（表示中のみ）
+      const contBtn = document.getElementById('t_continue');
+      if (contBtn.style.display !== 'none') contBtn.textContent = t.cont;
+      // ミッション更新
+      const msg = t.missions[new Date().getDate() % t.missions.length];
+      document.getElementById('missionChip').textContent = (lang.startsWith('ja') ? "🎯 今日のミッション: " :
+        lang==="en" ? "🎯 Today's mission: " :
+        lang==="ko" ? "🎯 오늘의 미션: " :
+        lang==="zh-CN" ? "🎯 今日任务: " : "🎯 今日任務: ") + msg;
+      document.getElementById('toggleLabel').textContent = t.toggle;
+    }
+    function setLang(lang){ localStorage.setItem('whoai_lang', lang); applyLang(lang); }
 
-    <!-- 目だけ表示レイヤー -->
-    <div class="eyes" id="eyes"><div class="eye left"></div><div class="eye right"></div></div>
+    // 名前テストトグル（研究フラグ）
+    (function initToggle(){
+      const el = document.getElementById('nameToggle');
+      const saved = localStorage.getItem('whoai_naming_test');
+      if(saved) el.checked = saved === 'on';
+      el.addEventListener('change', ()=>{
+        localStorage.setItem('whoai_naming_test', el.checked ? 'on' : 'off');
+        sparkle(el); // 視覚フィードバック
+      });
+    })();
 
-    <!-- HUD -->
-    <div class="hud">
-      <div class="row glass">
-        <span>夢：</span>
-        <span id="dreamBadge" class="pill" title="選択した夢">未選択</span>
-        <span style="margin-left:8px">進捗</span>
-        <div class="bar" title="夢ゲージ"><i id="goalFill"></i></div>
-        <span id="goalPct" style="min-width:38px;text-align:right">0%</span>
-      </div>
-      <div class="row" style="justify-content:flex-end">
-        <div class="row glass">
-          <button class="btn" id="btnCare">ケア（+明るさ/花）</button>
-          <button class="btn" id="btnTalk">会話（+明るさ/歌）</button>
-          <button class="btn" id="btnWatch">見守り10秒（+明るさ/星）</button>
-          <button class="btn" id="btnReset" title="状態を初期化">リセット</button>
-        </div>
-      </div>
-    </div>
+    // つづき導線
+    function continueFlow(){
+      const step = localStorage.getItem('whoai_progress'); // 'care' | 'talk' | 'evolved' ...
+      switch(step){
+        case 'care':     location.href = 'whoai_care.html'; break;
+        case 'talk':     location.href = 'whoai_talk.html'; break;
+        case 'evolved':  location.href = 'whoai_talk_evolved.html'; break;
+        default:         location.href = 'seed_select.html'; break;
+      }
+    }
 
-    <!-- 命名（明るさ>=0.35） -->
-    <div class="card" id="nameCard">
-      <h3>この子に名前をつけますか？</h3>
-      <div class="row">
-        <input id="nameInput" class="glass" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2)" placeholder="なまえ" />
-        <button class="btn" id="btnSetName">決定</button>
-      </div>
-    </div>
+    // 初期化：言語・続きボタン・スタート動線
+    (function init(){
+      const savedLang = localStorage.getItem('whoai_lang');
+      const browser   = (navigator.language || 'ja').toLowerCase();
+      const fallback  = ['ja','en','zh-cn','zh-tw','ko'].find(k=>browser.startsWith(k)) || 'ja';
+      applyLang(savedLang || fallback);
 
-    <!-- 夢選択（命名後） -->
-    <div class="card" id="dreamCard">
-      <h3>小さな夢をえらんでください</h3>
-      <div class="row">
-        <span class="pill" data-goal="flower">🌸 花を咲かせる</span>
-        <span class="pill" data-goal="song">🎵 歌を完成させる</span>
-        <span class="pill" data-goal="star">⭐ 星を見つける</span>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="btnChooseGoal">この夢にする</button>
-      </div>
-    </div>
+      const hasProgress = !!localStorage.getItem('whoai_progress');
+      if (hasProgress) document.getElementById('t_continue').style.display = '';
 
-    <!-- ハッピーエンド -->
-    <div class="ending" id="ending"><h2 id="endingText">ハッピーエンド！</h2></div>
-  </section>
+      // スタート：演出してから遷移
+      document.getElementById('t_start').addEventListener('click', ()=>{
+        fireworks(); // 小花火
+        setTimeout(()=> location.href='seed_select.html', 420);
+      });
 
-<script>
-(function(){
-  // ===== 実験状態 =====
-  const qs = new URLSearchParams(location.search);
-  const forceReset = qs.has('reset');
-  const LSKEY = 'whoai_tane_state_v2'; // v2: 旧データ無効化
-  const initial = {
-    L: 0.02,                 // 明るさ 0..1（EYE開始）
-    named: false,
-    name: '',
-    goal: null,              // 'flower'|'song'|'star'
-    progress: {flower:0, song:0, star:0},
-    goalTarget: {flower:5, song:5, star:5},
-    lastActive: Date.now(),
-    cond: 'EYE'
-  };
-  const state = (forceReset ? null : load()) || initial; save();
+      // ヒーローへの微インタラクション
+      const hero = document.getElementById('hero-ako');
+      let hasWinkImage = false;
+      // もしウィンク差分が存在すればホバー時に差し替え
+      const testImg = new Image(); testImg.onload=()=>{hasWinkImage=true}; testImg.src = 'ako_wink.png';
+      hero.addEventListener('pointerdown', (e)=>{
+        sparkle(e);
+        if(hasWinkImage){
+          const prev = hero.src;
+          hero.src = 'ako_wink.png';
+          setTimeout(()=> hero.src = prev, 220);
+        } else {
+          // 代替：疑似ウィンク
+          hero.classList.add('wink');
+          setTimeout(()=> hero.classList.remove('wink'), 260);
+        }
+      });
 
-  // ===== 要素 =====
-  const veil = document.getElementById('veil');
-  const charImg = document.getElementById('char');
-  const eyes = document.getElementById('eyes');
-  const lVal = document.getElementById('lVal');
-  const btnCare = document.getElementById('btnCare');
-  const btnTalk = document.getElementById('btnTalk');
-  const btnWatch = document.getElementById('btnWatch');
-  const btnReset = document.getElementById('btnReset');
-  const nameCard = document.getElementById('nameCard');
-  const nameInput = document.getElementById('nameInput');
-  const btnSetName = document.getElementById('btnSetName');
-  const dreamCard = document.getElementById('dreamCard');
-  const dreamBadge = document.getElementById('dreamBadge');
-  const btnChooseGoal = document.getElementById('btnChooseGoal');
-  const goalFill = document.getElementById('goalFill');
-  const goalPct = document.getElementById('goalPct');
-  const ending = document.getElementById('ending');
-  const endingText = document.getElementById('endingText');
+      // 背景の星（軽量ドット）
+      starfield();
+    })();
 
-  // キャラ色（localStorage.color があれば反映）
-  const color = (localStorage.getItem('color')||'pink').toLowerCase();
-  const valid = ['pink','blue','green'];
-  charImg.src = `public/assets/stage1/tane_${valid.includes(color)?color:'pink'}.png`;
+    /* ===== ここから小さな演出ユーティリティ ===== */
+    function typeLine(el, text, duration=800){
+      el.textContent = "";
+      const n = text.length, start = performance.now();
+      function tick(now){
+        const p = Math.min(1, (now-start)/duration);
+        const k = Math.floor(n * p);
+        el.textContent = text.slice(0, k);
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
 
-  // ===== ハンドラ =====
-  btnCare.addEventListener('click', ()=> act('care'));
-  btnTalk.addEventListener('click', ()=> act('talk'));
-  btnWatch.addEventListener('click', ()=> watch10s());
-  btnReset.addEventListener('click', ()=>{ if(confirm('状態を初期化します。')){ localStorage.removeItem(LSKEY); location.reload(); }});
-  btnSetName.addEventListener('click', ()=>{ const v=(nameInput.value||'').trim().slice(0,16); if(!v) return; state.named=true; state.name=v; save(); updateAll(); });
+    function sparkle(eOrEl){
+      const root = document.body;
+      const count = 12;
+      const rect = (eOrEl instanceof Event) ? null : eOrEl.getBoundingClientRect?.();
+      const baseX = (eOrEl instanceof Event) ? eOrEl.clientX : (rect ? rect.left + rect.width/2 : innerWidth/2);
+      const baseY = (eOrEl instanceof Event) ? eOrEl.clientY : (rect ? rect.top  + rect.height/2 : innerHeight/2);
+      for(let i=0;i<count;i++){
+        const s = document.createElement('div');
+        s.className = 'spark';
+        s.style.left = baseX+'px'; s.style.top = baseY+'px';
+        root.appendChild(s);
+        const ang = Math.random()*Math.PI*2, dist = 40+Math.random()*40;
+        const dx = Math.cos(ang)*dist, dy = Math.sin(ang)*dist;
+        s.animate([
+          {transform:'translate(0,0)', opacity:.9},
+          {transform:`translate(${dx}px,${dy}px)`, opacity:0}
+        ], {duration:420, easing:'ease-out'});
+        setTimeout(()=> s.remove(), 430);
+      }
+    }
 
-  let chosen=null;
-  dreamCard.addEventListener('click', e=>{ const pill=e.target.closest('.pill[data-goal]'); if(!pill) return; [...dreamCard.querySelectorAll('.pill')].forEach(p=>p.dataset.selected='false'); pill.dataset.selected='true'; chosen=pill.dataset.goal; });
-  btnChooseGoal.addEventListener('click', ()=>{ if(!chosen) return; state.goal=chosen; save(); updateAll(); });
+    function fireworks(){
+      const c = document.getElementById('fx'), g = c.getContext('2d');
+      c.width = innerWidth; c.height = innerHeight;
+      const parts = Array.from({length:90}, ()=>({
+        x: innerWidth/2, y: innerHeight/2,
+        vx:(Math.random()-0.5)*6, vy:(Math.random()-0.5)*6,
+        a:1
+      }));
+      let t=0; (function loop(){
+        g.clearRect(0,0,c.width,c.height);
+        parts.forEach(p=>{
+          p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.a-=0.015;
+          g.globalAlpha=Math.max(0,p.a);
+          g.fillStyle='#fff'; g.fillRect(p.x,p.y,2,2);
+        });
+        if(t++<26) requestAnimationFrame(loop); else g.clearRect(0,0,c.width,c.height);
+      })();
+    }
 
-  updateAll();
-
-  // ===== 行動 =====
-  function act(kind){
-    bumpL(0.10); // 行動ごとに明るさ+0.10
-    if(kind==='care' && state.goal==='flower') state.progress.flower = Math.min(state.progress.flower+1, state.goalTarget.flower);
-    if(kind==='talk' && state.goal==='song') state.progress.song   = Math.min(state.progress.song+1,   state.goalTarget.song);
-    state.lastActive = Date.now();
-    save(); updateAll();
-  }
-
-  function watch10s(){
-    btnWatch.disabled=true; const label=btnWatch.textContent; let s=10; btnWatch.textContent=`見守り中（${s}）`;
-    const t=setInterval(()=>{ s--; btnWatch.textContent=`見守り中（${s}）`; if(s<=0){ clearInterval(t); btnWatch.disabled=false; btnWatch.textContent=label; bumpL(0.10); if(state.goal==='star') state.progress.star = Math.min(state.progress.star+1, state.goalTarget.star); save(); updateAll(); } },1000);
-  }
-
-  function bumpL(d){ state.L = clamp(state.L + d, 0, 1); }
-  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
-
-  // ===== 表示更新 =====
-  function updateAll(){
-    const veilAlpha = clamp(1 - state.L, 0, 1);
-    veil.style.background = `rgba(0,0,0,${veilAlpha.toFixed(2)})`;
-    lVal.textContent = state.L.toFixed(2);
-
-    const eyesOnly = state.L < 0.35; // 0.35未満は目だけ
-    eyes.style.display = eyesOnly ? 'block' : 'none';
-    charImg.style.opacity = eyesOnly ? 0 : 1;
-
-    nameCard.style.display = (!state.named && state.L >= 0.35) ? 'block' : 'none';
-    dreamCard.style.display = (state.named && !state.goal) ? 'block' : 'none';
-
-    dreamBadge.textContent = state.goal ? goalLabel(state.goal) : '未選択';
-
-    const p = progressOf(state.goal); const t = targetOf(state.goal);
-    const pct = t>0 ? Math.min(100, Math.round(100*p/t)) : 0;
-    goalFill.style.width = pct + '%';
-    goalPct.textContent = pct + '%';
-
-    const achieved = t>0 && p>=t;
-    ending.style.display = achieved ? 'grid' : 'none';
-    if(achieved){ endingText.textContent = endingLine(state.goal); }
-  }
-
-  function progressOf(g){ if(!g) return 0; return state.progress[g]; }
-  function targetOf(g){ if(!g) return 0; return state.goalTarget[g]; }
-  function goalLabel(g){ return g==='flower'?'🌸 花': g==='song'?'🎵 歌': g==='star'?'⭐ 星':'未選択'; }
-  function endingLine(g){ const who=state.name||'きみ'; if(g==='flower')return `${who}といっしょに 花が咲いた`; if(g==='song')return `${who}といっしょに 歌が完成した`; if(g==='star')return `${who}といっしょに 星が見つかった`; return 'ハッピーエンド！'; }
-
-  function save(){ localStorage.setItem(LSKEY, JSON.stringify(state)); }
-  function load(){ try{ return JSON.parse(localStorage.getItem(LSKEY)||''); }catch(_){ return null; } }
-})();
-</script>
+    function starfield(){
+      const c = document.getElementById('fx'), g = c.getContext('2d');
+      c.width = innerWidth; c.height = innerHeight;
+      const stars = Array.from({length:140}, ()=>({
+        x: Math.random()*c.width,
+        y: Math.random()*c.height,
+        r: Math.random()*1.4+0.3
+      }));
+      function draw(){
+        g.clearRect(0,0,c.width,c.height);
+        g.fillStyle='rgba(255,255,255,.85)';
+        stars.forEach(s=>{ g.beginPath(); g.arc(s.x,s.y,s.r,0,6.283); g.fill(); });
+      }
+      draw();
+      // パララックス（ほんのり）
+      window.addEventListener('pointermove', (e)=>{
+        const dx = (e.clientX / c.width - .5) * 4;
+        const dy = (e.clientY / c.height - .5) * 4;
+        stars.forEach(s=>{ s.x += dx * (s.r*.15); s.y += dy * (s.r*.15); });
+        draw();
+      });
+      window.addEventListener('resize', ()=>{ c.width=innerWidth; c.height=innerHeight; draw();});
+    }
+  </script>
 </body>
 </html>
