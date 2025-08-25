@@ -1,4 +1,4 @@
-<!-- FILE: tane_experiment.html -->
+<!-- FILE: index.html （常にEYE条件で開始）-->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -52,7 +52,7 @@
 </head>
 <body>
   <div class="chips">
-    <span class="chip" id="condChip">cond: -</span>
+    <span class="chip" id="condChip">cond:EYE</span>
     <span class="chip">明るさ <b id="lVal">0.10</b></span>
   </div>
 
@@ -96,22 +96,18 @@
 
 <script>
 (function(){
-  const qs = new URLSearchParams(location.search);
-  const COND = (qs.get('cond')||'SIL').toUpperCase();
   const LSKEY='tane_state';
-  const state=load()||{L:0.1,named:false,name:'',goal:null,progress:{flower:0,song:0,star:0},goalTarget:{flower:5,song:5,star:5},cond:COND};
-  if(state.cond!==COND){state.cond=COND; save();}
+  const state=load()||{L:0.1,named:false,name:'',goal:null,progress:{flower:0,song:0,star:0},goalTarget:{flower:5,song:5,star:5},cond:'EYE'};
 
   const char=document.getElementById('char');
   const color=localStorage.getItem('color')||'pink';
   char.src=`public/assets/stage1/tane_${color}.png`;
 
   const veil=document.getElementById('veil'),eyes=document.getElementById('eyes'),
-        lVal=document.getElementById('lVal'),condChip=document.getElementById('condChip'),
-        nameCard=document.getElementById('nameCard'),dreamCard=document.getElementById('dreamCard'),
-        dreamBadge=document.getElementById('dreamBadge'),goalFill=document.getElementById('goalFill'),
-        goalPct=document.getElementById('goalPct'),ending=document.getElementById('ending'),
-        endingText=document.getElementById('endingText');
+        lVal=document.getElementById('lVal'),nameCard=document.getElementById('nameCard'),
+        dreamCard=document.getElementById('dreamCard'),dreamBadge=document.getElementById('dreamBadge'),
+        goalFill=document.getElementById('goalFill'),goalPct=document.getElementById('goalPct'),
+        ending=document.getElementById('ending'),endingText=document.getElementById('endingText');
 
   document.getElementById('btnCare').onclick=()=>{bump(0.1); if(state.goal==='flower')state.progress.flower++; save(); update();};
   document.getElementById('btnTalk').onclick=()=>{bump(0.1); if(state.goal==='song')state.progress.song++; save(); update();};
@@ -127,9 +123,8 @@
   function update(){
     veil.style.background=`rgba(0,0,0,${(1-state.L).toFixed(2)})`;
     lVal.textContent=state.L.toFixed(2);
-    condChip.textContent=`cond:${state.cond}`;
-    eyes.style.display=(state.cond==='EYE'&&state.L<0.35)?'block':'none';
-    char.style.display=(state.cond==='EYE'&&state.L<0.35)?'none':'block';
+    eyes.style.display=(state.L<0.35)?'block':'none';
+    char.style.display=(state.L<0.35)?'none':'block';
     nameCard.style.display=(!state.named&&state.L>=0.35)?'block':'none';
     dreamCard.style.display=(state.named&&!state.goal)?'block':'none';
     dreamBadge.textContent=state.goal||'未選択';
